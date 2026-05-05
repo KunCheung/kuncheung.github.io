@@ -1,68 +1,107 @@
 import { useEffect, useMemo, useState } from "react";
 
 const navItems = [
-  { id: "intro", label: "简介" },
-  { id: "now", label: "近况" },
-  { id: "projects", label: "项目" },
-  { id: "writing", label: "写作" },
-  { id: "contact", label: "联系" },
+  { id: "intro", label: "Intro" },
+  { id: "updates", label: "Updates" },
+  { id: "projects", label: "Projects" },
+  { id: "publishing", label: "Publications" },
+  { id: "writing", label: "Writing" },
+  { id: "contact", label: "Contact" },
 ];
 
 const updates = [
   {
-    date: "2026.04",
-    title: "整理个人品牌主页",
-    body: "把项目、想法、长期关注的问题放到一个更容易更新的入口里。",
-  },
-  {
-    date: "2026.03",
-    title: "打磨一个轻量工具",
-    body: "围绕个人知识管理做小步实验，优先追求稳定、顺手和可迁移。",
-  },
-  {
-    date: "2026.02",
-    title: "重新梳理写作主题",
-    body: "把产品判断、技术实践和生活观察拆成几个持续更新的栏目。",
+    date: "2026.05.01",
+    title: "PrivGate accepted to ICML 2026",
+    body: "Thrilled to share that our paper \"PrivGate: Securing Contextual Integrity for LLM Agents via Latent Privacy Signals\" has been accepted to ICML.",
+    href: "https://openreview.net/pdf?id=oKizUOP7E4",
   },
 ];
 
 const projects = [
   {
     name: "Signal Desk",
-    kind: "产品原型",
-    description: "一个帮助创作者收集、筛选和复盘灵感信号的桌面型工作台。",
+    kind: "Product Prototype",
+    description:
+      "A lightweight workspace for collecting, filtering, and reviewing weak signals across research and product ideas.",
     tags: ["React", "Workflow", "Local-first"],
-  },
-  {
-    name: "Tiny Systems",
-    kind: "实践合集",
-    description: "用小系统解决重复工作：记录模板、自动化脚本、个人仪表盘。",
-    tags: ["Automation", "Design", "Notes"],
-  },
-  {
-    name: "Build Notes",
-    kind: "公开笔记",
-    description: "记录从想法到上线的过程，包括取舍、踩坑和复盘。",
-    tags: ["Writing", "Product", "Reflection"],
   },
 ];
 
 const posts = [
   {
-    title: "Agent 安全的核心，是约束不确定决策系统",
-    meta: "Agent 安全 / 12 min",
+    title: "The Core of Agent Safety Is Constraining Uncertain Decision Systems",
+    meta: "Agent Safety / 12 min",
     href: "#/articles/agent-safety-core",
     source: `${import.meta.env.BASE_URL}articles/agent-safety-core.md`,
     slug: "agent-safety-core",
   },
 ];
 
-const links = [
-  { label: "Email", href: "mailto:yukun.dong@hotmail.com" },
-  { label: "GitHub", href: "#" },
+const publications = [
+  {
+    title:
+      "PrivGate: Securing Contextual Integrity for LLM Agents via Latent Privacy Signals",
+    authors: "Runshan Hu, Yukun Dong, Yingying Huangfu, Ruohan Zhao, Yi Xie, and Tieyan Li",
+    venue:
+      "The 43rd International Conference on Machine Learning (ICML 2026)",
+    href: "https://openreview.net/pdf?id=oKizUOP7E4",
+  },
+  {
+    title: "Privacy-Preserving Ridesharing via Probabilistic Matching",
+    authors: "Tianye Ma, Yukun Dong, Yidan Hu, and Rui Zhang",
+    venue:
+      "2024 IEEE/ACM 32nd International Symposium on Quality of Service (IWQoS 2024)",
+    href: "https://doi.org/10.1109/IWQoS61813.2024.10682893",
+  },
+  {
+    title: "Locally Differentially Private and Fair Key-Value Aggregation",
+    authors: "Yukun Dong, Zhengwu Lu, and Rui Zhang",
+    venue:
+      "The 12th International Symposium on Information and Communication Technology (SOICT 2023)",
+    href: "https://doi.org/10.1145/3628797.3628807",
+  },
+  {
+    title:
+      "Authenticating Outsourced Location-Based Skyline Queries under Shortest Path Distance",
+    authors: "Yidan Hu, Yukun Dong, Wenxin Chen, Yingfei Dong, and Rui Zhang",
+    venue: "2023 IEEE Conference on Communications and Network Security (CNS 2023)",
+    href: "https://doi.org/10.1109/CNS59707.2023.10288754",
+  },
+  {
+    title: "Location Inference under Temporal Correlation",
+    authors: "Yukun Dong, Yidan Hu, Aisha Aseeri, Depeng Li, and Rui Zhang",
+    venue:
+      "2023 32nd International Conference on Computer Communications and Networks (ICCCN 2023)",
+    href: "https://doi.org/10.1109/ICCCN58024.2023.10230099",
+  },
+  {
+    title: "Continuous Indoor Tracking via Differential RSS Fingerprinting",
+    authors: "Yunzhi Li, Yidan Hu, Aishah Aseeri, Yukun Dong, and Rui Zhang",
+    venue:
+      "2022 IEEE 19th International Conference on Mobile Ad Hoc and Smart Systems (MASS 2022)",
+    href: "https://doi.org/10.1109/MASS56207.2022.00072",
+  },
+  {
+    title: "Memory-based stag hunt game on regular lattices",
+    authors: "Yukun Dong, Hedong Xu, and Suohai Fan",
+    venue: "Physica A: Statistical Mechanics and its Applications, 2019",
+    href: "https://doi.org/10.1016/j.physa.2018.12.025",
+  },
+  {
+    title: "Location of Facility Based on Simulated Annealing and \"ZKW\" Algorithms",
+    authors: "Yukun Dong, Jinyu Wang, Fenghua Chen, Yong Hu, and Yong Deng",
+    venue: "Mathematical Problems in Engineering, 2017",
+    href: "https://doi.org/10.1155/2017/4628501",
+  },
 ];
 
-const profileImage = `${import.meta.env.BASE_URL}profile-placeholder.svg`;
+const links = [
+  { label: "Email", href: "mailto:yukun.dong@hotmail.com" },
+  { label: "GitHub", href: "https://github.com/KunCheung" },
+];
+
+const profileImage = `${import.meta.env.BASE_URL}avatar.jpg`;
 
 function getInitialTheme() {
   if (typeof window === "undefined") {
@@ -129,17 +168,17 @@ function App() {
 
   useEffect(() => {
     document.title = activeArticle
-      ? `${activeArticle.title} - 个人品牌主页`
-      : "个人品牌主页";
-  }, [activeArticle]);
+      ? `${activeArticle.title} - Personal Homepage`
+      : "Personal Homepage";
+  }, [activeArticle]); 
 
   const profile = useMemo(
     () => ({
-      name: "Yukun Dong (董昱坤)",
-      role: "安全隐私研究员",
-      location: "当前城市",
+      name: "Yukun Dong",
+      role: "Privacy and Security Researcher",
+      location: "Shenzhen, China",
       summary:
-        "我关注产品判断、技术实现和个人工作流，喜欢把模糊的想法打磨成可用、可维护的小系统。",
+        "I am a postdoctoral researcher at Huawei, working with Dr. Tieyan Li on digital identity, trust, and privacy for LLM-based agents. I received my Ph.D. from the University of Delaware, where I was advised by Prof. Rui Zhang and worked on security and privacy in AI and cloud computing systems.\n\nMy research interests include Privacy-Enhancing Technologies, Agent Security and Privacy, with a focus on building trustworthy AI agents that protect sensitive data across its entire lifecycle.",
     }),
     [],
   );
@@ -153,7 +192,7 @@ function App() {
         theme={theme}
       />
 
-      <aside className="sidebar" aria-label="个人主页导航">
+      <aside className="sidebar" aria-label="Personal homepage navigation">
         <Sidebar
           activeSection={activeSection}
           profile={profile}
@@ -177,36 +216,21 @@ function HomePage({ profile }) {
   return (
     <>
       <Section id="intro" label="Intro">
-        <div className="intro-grid">
-          <div className="intro-copy">
-            <p className="eyebrow">Personal OS / Product Notes</p>
-            <h1>{profile.name}</h1>
-            <p className="lead">{profile.summary}</p>
-            <div className="intro-actions" aria-label="主要操作">
-              <a className="primary-link" href="#projects">
-                查看项目
-              </a>
-              <a className="text-link" href="#contact">
-                联系我
-              </a>
-            </div>
+        <div className="intro-copy">
+          <p className="eyebrow">Personal OS</p>
+          <p className="lead">{profile.summary}</p>
+          <div className="intro-actions" aria-label="Primary actions">
+            <a className="primary-link" href="#projects">
+              View Projects
+            </a>
           </div>
-          <figure className="portrait">
-            <img
-              src={profileImage}
-              alt="个人头像占位图"
-              width="960"
-              height="1200"
-            />
-            <figcaption>头像 / 工作照占位</figcaption>
-          </figure>
         </div>
       </Section>
 
-      <Section id="now" label="Now">
+      <Section id="updates" label="Updates">
         <div className="section-heading">
-          <p className="eyebrow">Now</p>
-          <h2>最近在做什么</h2>
+          <p className="eyebrow">Updates</p>
+          <h2>Latest News</h2>
         </div>
         <NowList updates={updates} />
       </Section>
@@ -214,15 +238,34 @@ function HomePage({ profile }) {
       <Section id="projects" label="Selected Work">
         <div className="section-heading">
           <p className="eyebrow">Selected Work</p>
-          <h2>精选项目</h2>
+          <h2>Selected Projects</h2>
         </div>
         <ProjectList projects={projects} />
+      </Section>
+
+      <Section id="publishing" label="Publications">
+        <div className="section-heading">
+          <p className="eyebrow">Publications</p>
+          <h2>Publications</h2>
+        </div>
+        <div className="publication-list">
+          {publications.map((publication) => (
+            <article className="publication-item" key={publication.title}>
+              <h3>{publication.title}</h3>
+              <p>{publication.authors}</p>
+              <p>{publication.venue}</p>
+              <a href={publication.href} rel="noreferrer" target="_blank">
+                [Paper link]
+              </a>
+            </article>
+          ))}
+        </div>
       </Section>
 
       <Section id="writing" label="Writing">
         <div className="section-heading">
           <p className="eyebrow">Writing</p>
-          <h2>文章与想法</h2>
+          <h2>Writing and Notes</h2>
         </div>
         <div className="writing-list">
           {posts.map((post) => (
@@ -238,7 +281,10 @@ function HomePage({ profile }) {
         <div className="contact-panel">
           <div>
             <p className="eyebrow">Contact</p>
-            <h2>欢迎交流项目、产品想法和长期主义的小系统。</h2>
+            <h2>
+              Open to conversations about security, privacy, agent safety, and
+              reliable systems.
+            </h2>
           </div>
           <LinkDock links={links} />
         </div>
@@ -282,15 +328,19 @@ function ArticlePage({ article }) {
   return (
     <article className="article-page">
       <a className="back-link" href="#writing">
-        返回写作
+        Back to Writing
       </a>
       <div className="article-meta">
         <p className="eyebrow">Writing</p>
         <span>{article.meta}</span>
       </div>
-      {status === "loading" && <p className="article-status">文章加载中...</p>}
+      {status === "loading" && (
+        <p className="article-status">Loading article...</p>
+      )}
       {status === "error" && (
-        <p className="article-status">文章暂时无法加载，请稍后再试。</p>
+        <p className="article-status">
+          This article could not be loaded. Please try again later.
+        </p>
       )}
       {status === "ready" && <MarkdownContent markdown={markdown} />}
     </article>
@@ -426,7 +476,7 @@ function Sidebar({ activeSection, profile, setTheme, theme }) {
         <img
           className="profile-image"
           src={profileImage}
-          alt="个人头像占位图"
+          alt="Profile placeholder"
           width="160"
           height="160"
         />
@@ -437,7 +487,7 @@ function Sidebar({ activeSection, profile, setTheme, theme }) {
         </div>
       </div>
 
-      <nav className="nav-list" aria-label="页面分区">
+      <nav className="nav-list" aria-label="Page sections">
         {navItems.map((item) => (
           <a
             aria-current={activeSection === item.id ? "page" : undefined}
@@ -468,7 +518,7 @@ function MobileHeader({ activeSection, profile, setTheme, theme }) {
         </a>
         <ThemeToggle setTheme={setTheme} theme={theme} />
       </div>
-      <nav className="mobile-nav" aria-label="移动端页面分区">
+      <nav className="mobile-nav" aria-label="Mobile page sections">
         {navItems.map((item) => (
           <a
             aria-current={activeSection === item.id ? "page" : undefined}
@@ -489,10 +539,10 @@ function ThemeToggle({ setTheme, theme }) {
 
   return (
     <button
-      aria-label={isDark ? "切换到浅色模式" : "切换到深色模式"}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className="icon-button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      title={isDark ? "浅色模式" : "深色模式"}
+      title={isDark ? "Light mode" : "Dark mode"}
       type="button"
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
@@ -515,7 +565,15 @@ function NowList({ updates }) {
         <li key={`${update.date}-${update.title}`}>
           <time>{update.date}</time>
           <div>
-            <h3>{update.title}</h3>
+            <h3>
+              {update.href ? (
+                <a href={update.href} rel="noreferrer" target="_blank">
+                  {update.title}
+                </a>
+              ) : (
+                update.title
+              )}
+            </h3>
             <p>{update.body}</p>
           </div>
         </li>

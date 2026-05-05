@@ -260,15 +260,8 @@ svg {
   border-bottom: 0;
 }
 
-.intro-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
-  gap: 48px;
-  align-items: center;
-}
-
 .intro-copy {
-  max-width: 640px;
+  max-width: 920px;
 }
 
 .eyebrow {
@@ -310,11 +303,12 @@ h3 {
 }
 
 .lead {
-  max-width: 660px;
+  max-width: 920px;
   margin: 24px 0 0;
   color: var(--muted);
   font-size: 20px;
   line-height: 1.75;
+  white-space: pre-line;
 }
 
 .intro-actions {
@@ -343,25 +337,6 @@ h3 {
 .text-link {
   padding: 0 4px;
   color: var(--accent-strong);
-}
-
-.portrait {
-  margin: 0;
-}
-
-.portrait img {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  object-fit: cover;
-}
-
-.portrait figcaption {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 .section-heading {
@@ -476,6 +451,42 @@ h3 {
 
 .writing-item:hover span {
   color: var(--accent-strong);
+}
+
+.publication-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.publication-item {
+  display: grid;
+  gap: 8px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.publication-item h3 {
+  line-height: 1.45;
+}
+
+.publication-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.publication-item a {
+  width: fit-content;
+  color: var(--accent-strong);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.publication-item a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .contact-panel {
@@ -614,13 +625,8 @@ button:focus-visible {
     padding-left: 24px;
   }
 
-  .intro-grid,
   .project-grid {
     grid-template-columns: 1fr;
-  }
-
-  .portrait {
-    max-width: 340px;
   }
 }
 
@@ -702,10 +708,6 @@ button:focus-visible {
   .page-section:first-child {
     min-height: auto;
     padding-top: 48px;
-  }
-
-  .intro-grid {
-    gap: 32px;
   }
 
   h1 {

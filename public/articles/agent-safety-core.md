@@ -1,152 +1,149 @@
-# Agent 安全的核心，是约束不确定决策系统
+# The Core of Agent Safety Is Constraining Uncertain Decision Systems
 
-很多人谈大模型安全，第一反应还是盯着“输出”看：会不会越狱？会不会胡说？会不会泄露隐私？
+When people talk about large model safety, the first instinct is often to look at outputs: will the model jailbreak, hallucinate, or leak private information?
 
-过去几年，这确实是核心痛点。但今天，随着 OpenClaw、Claude Code，以及各种手机系统级智能体走向真实场景，Agent 已经越过了“只回答问题”的阶段，开始直接帮用户“做事”——读环境、调工具、执行操作，甚至跨应用完成任务。
+For the past few years, those have indeed been central concerns. But as OpenClaw, Claude Code, and system-level mobile agents move into real environments, agents have moved beyond simply answering questions. They now help users do things: read the environment, call tools, execute operations, and even complete tasks across applications.
 
-当讨论对象从一个被动对话的模型，变成一个能读取环境、调用工具、执行动作的决策体时，安全问题的重心就变了。
+Once the object of discussion changes from a passive conversational model to a decision-making entity that can read context, call tools, and take actions, the center of gravity in safety also changes.
 
-真正值得警惕的，不再只是它最后说了什么，而是：它如何理解环境？依据什么做判断？这些基于概率的判断，又会如何转化为不可逆的真实行动？
+The most important question is no longer only what the model says at the end. It is how the agent understands the environment, what it uses as the basis for judgment, and how those probabilistic judgments are converted into real actions that may be hard to reverse.
 
-换言之，Agent 安全，首先是一个决策系统工程问题，其次才是一个内容过滤问题。
+In other words, agent safety is first a decision-systems engineering problem, and only second a content-filtering problem.
 
-这是本文试图论证的核心：**Agent 的安全挑战，不在于它“生成了什么内容”，而在于它在开放、不确定的环境中，做出了什么真实行动。**
+This is the core claim of this essay: **the safety challenge of agents is not primarily what content they generate, but what real actions they take in open and uncertain environments.**
 
-如果承认模型天然具有不可彻底消除的不完全可靠性，那么安全研究的关键命题就不再是“如何把模型调教到永远正确”，而是：**如何给一个不确定的概率决策大脑，配上一套能兜底的外部确定性结构。**
-
----
-
-## 一、重新定义问题：Agent 的核心风险，是决策风险
-
-先看一个具体场景。
-
-一个能访问邮箱、日历、网盘和浏览器的个人助理型 Agent，收到一句话：“帮我把下周去东京出差的事情安排一下。”从这一刻开始，风险就不再只是“它会说什么”，而是“它会怎么做”。它会读邮件确认行程、查日历找空档、搜酒店、调地图，甚至可能直接准备下单。
-
-真正的问题也未必表现为一句明显危险的话，而更可能表现为：它误把网页营销文案当成任务线索，读了本不需要读取的私人邮件，在没有确认预算的情况下默认预订，或者在一连串局部看起来还合理的步骤里，把任务逐渐推进到一个用户并不真正想要的结果。
-
-这个例子已经足够说明，Agent 的核心风险不是内容生成，而是它会基于不完整信息持续做判断，并把这些判断沿着读信息、调工具、改状态、做动作的链条一步步传导。
-
-也正因为如此，讨论 Agent 安全时，一个更贴近现实的起点是：它已经不只是一个“会回答问题的模型”，而是一个会持续理解环境、更新状态、调用工具并执行任务的决策体。
-
-开放环境会进一步放大这个问题。因为信息源混杂、任务链条更长，而且错误开始拥有真实后果。问题不再只是回答质量下降，而可能变成数据被多读、权限被滥用、工具被误调用，甚至触发不可逆的高风险操作。
-
-所以，开放环境中的 Agent 安全，本质上是在处理一个问题：**如何约束一个不确定决策系统。**
-
-一旦把 Agent 看成一个在开放环境中持续做决策的系统，很多常见风险就会自然被重新理解：Prompt injection，是低可信来源越权影响高权限决策；记忆过度召回，是系统在错误判断下访问了本不该使用的信息；工具误调用，是模型把概率性判断直接转化成了确定性执行；行为漂移，则是长任务链中原始目标与限制逐渐失效。
-
-它们虽然发生在不同模块，但共享同一个母问题：**一个以概率推断为基础的系统，正在开放世界中承担原本需要更强确定性支撑的决策职责。**
-
-> 人们过去习惯防的是“模型说错一句话”；Agent 时代真正需要防的，是“模型沿着一条错误路径把事情做下去”。
+If we accept that models are inherently imperfect and cannot be made fully reliable, then the central question in safety research is no longer how to tune a model until it is always correct. It is: **how do we pair an uncertain probabilistic decision engine with external deterministic structures that can keep it bounded?**
 
 ---
 
-## 二、系统性解法：为不确定决策系统寻找“确定性锚点”
+## 1. Redefining the Problem: The Core Risk of Agents Is Decision Risk
 
-如果 Agent 的核心风险在于它会基于不完整理解做出不确定决策，那么一个最自然、也最重要的方向，就是尽可能提升模型本身的判断质量。
+Consider a concrete scenario.
 
-这条路径不只是“可选项”，而是必须持续推进的一条主线。没有更强的理解能力、更稳的推理能力、更好的任务跟随能力，后面的很多安全设计都会变得很被动。优化模型本身，本来就是 Agent 安全的一部分。
+A personal assistant agent that can access email, calendars, cloud storage, and the browser receives a request: "Help me arrange my business trip to Tokyo next week." From that moment on, the risk is no longer just what the agent will say. The risk is what it will do. It may read emails to confirm the itinerary, inspect calendars for open slots, search for hotels, use maps, and perhaps even prepare a booking.
 
-现有做法也已经很多了，比如后训练微调（SFT、RLHF、DPO），推理与提示优化（Chain-of-Thought、ReAct、任务分解），角色映射与语境约束（system prompt、persona、任务模板），能力外接（retrieval、tool use、search），以及运行时自我修正（反思和经验反馈）。
+The real problem may not appear as an obviously dangerous sentence. It may appear as the agent mistaking marketing copy on a webpage for task instructions, reading private email that was not needed, defaulting to a booking without confirming the budget, or gradually pushing a task toward an outcome the user did not actually want through a sequence of locally plausible steps.
 
-这些方法虽然形式不同，但目标其实很一致：让模型在给定任务中更稳定、更一致、更符合预期。归根结底，它们解决的是：**如何让模型更常做对。**
+This example is enough to show that the core risk of agents is not content generation. The core risk is that they keep making judgments under incomplete information, and those judgments flow through a chain of reading information, calling tools, changing state, and taking action.
 
-但安全并不只在于“更常做对”，还在于“即使做错，也不要轻易越界”。模型优化本质上是在改善行为分布，却很难直接回答另一类问题：在什么情况下，模型绝不能访问某类数据，绝不能调用某个工具，绝不能把外部文本视作高优先级指令。
+For that reason, a more realistic starting point for agent safety is this: an agent is no longer merely a model that answers questions. It is a decision-making system that continuously interprets the environment, updates state, calls tools, and executes tasks.
 
-一个很现实的例子是：一个经过 SFT 和偏好优化的客服 Agent，也许已经能很好地遵循服务话术，并在绝大多数工单里正确回复。但如果它同时被赋予了退款、改价、查看订单详情等能力，那么真正关键的问题就不再只是它“答得好不好”，而是当用户描述模糊、上下文混乱、甚至出现恶意引导时，它会不会调用不该调用的能力，或者在未满足条件时执行高风险操作。
+Open environments amplify the problem. Information sources are mixed, task chains are longer, and errors begin to have real consequences. The problem is no longer just lower answer quality. It can become over-reading data, abusing permissions, calling tools incorrectly, or triggering irreversible high-risk operations.
 
-也就是说，一个模型可以在语言层面非常对齐，却仍然在执行层面缺乏硬限制。这正是“模型优化很重要，但仍然不等于系统安全”的现实版本。
+So agent safety in open environments is fundamentally about one question: **how do we constrain an uncertain decision system?**
 
-如果说第一条路是在努力减少不确定性，那么第二条路的出发点则更现实一些：**不确定性不会被彻底消除，因此系统必须学会在不确定性存在的前提下继续可靠运行。**
+Once we view agents as decision systems operating in open environments, many familiar risks can be understood more naturally. Prompt injection becomes a low-trust source influencing high-privilege decisions. Over-retrieval from memory becomes the system accessing information that should not have been used. Tool misuse becomes a probabilistic judgment being converted directly into deterministic execution. Behavioral drift becomes the gradual loss of the original goal and constraints across a long task chain.
 
-这就是“确定性锚点”的意义。它们不是为了让模型彻底没有不确定性，而是为了防止这种不确定性继续外溢、累积并演变成真实风险。
+These risks occur in different modules, but they share the same root problem: **a system based on probabilistic inference is taking on decision responsibilities that require stronger deterministic support.**
 
-再往工程上走，这种“外部支撑”最终往往会落实为一整套 harness 工程：它不直接替模型思考，而是在模型之外组织上下文、约束调用、管理状态、收紧权限，并在关键节点接入检查、回退和审计机制。
-
-所谓确定性锚点，可以理解为那些不依赖模型临场自由推断、而是由系统事先放好的外部支点。模型负责理解世界，而锚点负责告诉模型：即使你理解错了，哪些事情依然不能做，哪些动作必须停下来，哪些决定需要额外确认。
-
-这类外部锚点，按其性质和适用场景，大体可以分为两类：一类是承担“高价值、低频”判断的**人类锚点**，另一类是承担“高频、兜底”限制的**规则锚点**。它们各自有不可替代的价值，但也都有极易被误用的陷阱。
-
-### 1）先看最符合直觉的人类锚点
-
-在所有外部锚点中，人类可能是最直观、也最容易被想到的一类。因为当模型要做出高风险决定时，最稳妥的办法似乎就是“让人最后看一眼”。在很多现实场景中，这种直觉是成立的。尤其是在那些不可逆、高代价、高敏感度的动作上，人的介入往往具有不可替代的意义。
-
-但“让人参与”不等于“有效监督”。很多系统在引入 Human in the Loop 时，默认认为“只要让人点一下确认，安全性就提高了”。这其实过于理想化，因为人的注意力、耐心和判断质量本身都是有限的。
-
-如果系统过于频繁地要求人类确认，最终会引发决策疲劳。人会从一开始的谨慎判断，逐渐转向机械点击、默认同意。这时，Human in the Loop 就会从“有效监督”退化为“形式化确认”。
-
-现实里非常常见的情况是：一个办公 Agent 每次要发邮件、共享文档、修改会议、下载附件都弹出确认框。最初这些确认看起来像是在增强安全，但用户很快就会形成条件反射：不看内容，直接点“允许”。结果是，系统表面上保留了 human in the loop，实际上却把人类监督退化成了流程装饰。
-
-> 人当然比模型更能承担复杂价值判断，但人不是一个可以无限次、稳定、高质量输出的监督器。
-
-所以，关键不是“有没有人”，而是“人什么时候出现”。Human in the Loop 真正值得研究的，不是如何让人更频繁地参与，而是如何把人的注意力留在最值得介入的地方。
-
-### 2）如果人类锚点只能防守“少而精”的节点，那么规则锚点就是日常托底机制
-
-如果说人类锚点适合承担少量高价值判断，那么规则锚点更适合承担大量高频、稳定、可自动化执行的限制任务。因为人会疲劳，会分心，会因为交互负担而逐渐失去判断质量；而规则只要设计得当，就可以稳定地、可重复地执行。
-
-这里的“规则”不是狭义的 if-else。它不只是几条固定逻辑，而是所有那些能够被系统可靠执行、用于限制行动范围的机制：权限限制、数据访问控制、工具调用条件、状态转换约束、身份和角色绑定、生命周期限制、任务级最小授权、信息源分层，以及风险分级与审计机制。
-
-规则最核心的价值，不在于提升模型的平均判断质量，而在于即使模型判断错了，系统也不会因此立刻冲出安全范围。也就是说，规则解决的不是“模型够不够聪明”，而是“模型出错时，后果会不会失控”。
-
-一个很现实的例子是旅行预订 Agent。它可以搜索航班、订酒店、叫车、申请报销。一个成熟的系统，不应该只是期待模型“自己知道什么时候该克制”，而应该显式规定：未经预算确认不得下单、未经身份验证不得查看乘机证件信息、未经用户确认不得跨平台共享行程、任务结束后临时访问权限自动回收。这些都不是模型推理出来的善意，而是系统层面提前写进去的限制。
-
-如果再往工程实现上走一步，这里很容易引出两类关键机制。
-
-其一，是**污点追踪（taint tracking）**。来自网页、邮件或第三方工具的文本，可以在系统内部被打上“低可信来源”的标签；一旦模型试图把带有这类标签的信息传递给高权限执行模块，比如发邮件、外发文件、调用支付工具，规则锚点就在引擎层直接拦截。
-
-其二，是**临时凭证（ephemeral credentials）**。未来更成熟的 Agent 安全架构，很可能不会给模型长期、宽泛的固定权限，而是根据任务动态签发临时 Token：只能访问某个日历、只能读取不能修改、任务结束后立即失效。
-
-这两点其实也再次说明：规则的本质，不是替模型做决策，而是在模型决策出错时，仍然保证系统不轻易冲出合理范围。
+> In the past, people tried to prevent the model from saying one wrong thing. In the agent era, we need to prevent the model from following a wrong path all the way into action.
 
 ---
 
-## 三、案例验证：重新认识 Prompt Injection —— 从“净化大脑”到“约束手脚”
+## 2. A Systemic Answer: Deterministic Anchors for Uncertain Decision Systems
 
+If the core risk of agents is that they make uncertain decisions based on incomplete understanding, then the most natural and important direction is to improve the model itself.
 
+This is not optional. It is a necessary line of work. Without stronger understanding, more stable reasoning, and better task following, many downstream safety designs become reactive and brittle. Model improvement is part of agent safety.
 
-Prompt Injection 之所以危险，不只是因为“模型会被坏 prompt 骗到”，而是因为它暴露了 Agent 系统里一个更底层的事实：系统必须读取外部信息才能完成任务，但这些外部信息本身又是不可信的。OWASP 也把 Prompt Injection 持续列为 GenAI 应用的核心风险之一。([genai.owasp.org](https://genai.owasp.org/llmrisk/llm01-prompt-injection/?utm_source=chatgpt.com))
+Existing methods already cover a broad range of approaches: post-training such as SFT, RLHF, and DPO; reasoning and prompt optimization such as chain-of-thought, ReAct, and task decomposition; role mapping and contextual constraints such as system prompts, personas, and task templates; external capabilities such as retrieval, tool use, and search; and runtime self-correction through reflection and feedback.
 
-这里最重要的一点是：面对 Prompt Injection，我们不能再抱有一种过于乐观的想法——仿佛只要系统提示写得足够好，或者把信息源标记得足够清楚，模型最终就能在“什么是指令、什么是数据”之间划出一条稳定边界。现实并没有这么简单。对今天的大模型来说，外部文本一旦进入上下文，就会在同一个推理过程中发生语义融合。换句话说，数据与控制的混淆不是偶发现象，而是模型架构下很难被彻底消除的结果。
+These methods differ in form, but their goal is similar: make the model more stable, consistent, and aligned with expectations in a given task. At the root, they try to solve the question: **how do we make the model do the right thing more often?**
 
-一旦承认这一点，防御思路就必须跟着改变。问题不再是“如何确保模型永远不被影响”，而是“当模型已经被影响时，系统如何不让它造成实质性破坏”。这也是为什么，面对 Prompt Injection，更合理的原则不是“假设拦截成功”，而是“假设失陷”。微软近来的安全建议同样强调，要把间接注入、越界调用和高影响误操作，当作需要用系统级控制来约束的执行风险。([learn.microsoft.com](https://learn.microsoft.com/en-us/security/zero-trust/sfi/defend-indirect-prompt-injection?utm_source=chatgpt.com))
+But safety is not only about doing the right thing more often. It is also about not crossing boundaries when the model is wrong. Model optimization improves the behavior distribution, but it does not directly answer another class of questions: when must the model never access certain data, never call a certain tool, or never treat external text as high-priority instruction?
 
-这就把问题重新带回了前文的“规则锚点”。面对注入，与其把希望全部寄托在文本过滤上，不如直接控制爆炸半径：读取陌生邮件时不得调用外发工具，临时 Token 只能读不能写，任务结束后权限自动回收。在更进一步的工程实现上，这甚至意味着系统应该根据上下文动态做权限降级：当 Agent 正在处理陌生网页、外部邮件或第三方文档时，自动剥夺“发邮件”“改日历”“调用支付”这类高危能力；只有在上下文被清空、任务被重新确认，或者经过人类锚点强校验后，权限才恢复。
+A practical example is a customer support agent that has been fine-tuned and preference-optimized. It may follow service scripts well and respond correctly in most tickets. But if it also has the ability to issue refunds, change prices, or inspect order details, the key question is no longer only whether it answers well. The key question is whether, under ambiguous user descriptions, messy context, or malicious guidance, it will call capabilities it should not call or execute high-risk actions before the right conditions are met.
 
-这样一来，即使 Prompt Injection 成功，模型下达了危险指令，系统层也会直接拒绝执行。真正被保护的，不是模型的“想法”，而是系统的“行动能力”。
+In other words, a model can be linguistically aligned while still lacking hard execution-level constraints. This is the practical version of the claim that model optimization matters, but does not equal system safety.
 
-所以，Prompt Injection 真正证明的，不是“模型还不够聪明”，而是另一件事：既然模型内部的概率判断注定会被不可信环境持续影响，那么安全就不能主要寄托于模型内部的自我辨别能力，而必须依赖模型之外的确定性结构。它不是一个孤立漏洞，而是前面整套论证最典型的案例：当一个不确定决策系统进入开放环境时，真正救系统的，不是“希望它别被洗脑”，而是“即使它被洗脑，也没有足够权限把事情做坏”。
+If the first path tries to reduce uncertainty, the second path starts from a more realistic premise: **uncertainty will not disappear, so the system must remain reliable even while uncertainty exists.**
+
+That is the purpose of deterministic anchors. They are not meant to eliminate uncertainty inside the model. They are meant to prevent that uncertainty from leaking outward, accumulating, and becoming real risk.
+
+In engineering terms, this external support often becomes a harness around the model. The harness does not think for the model. Instead, it organizes context, constrains calls, manages state, tightens permissions, and inserts checks, rollback, and audit mechanisms at critical points.
+
+Deterministic anchors are external supports that do not depend on the model's free-form, in-the-moment inference. The model tries to understand the world. The anchors tell the model what still cannot be done if that understanding is wrong, which actions must stop, and which decisions require additional confirmation.
+
+These anchors can be divided into two broad types. One type is the **human anchor**, which handles high-value, low-frequency judgments. The other is the **rule anchor**, which handles high-frequency guardrails and fallback constraints. Both are valuable, and both are easy to misuse.
+
+### 1. The Human Anchor
+
+Among external anchors, the human is the most intuitive. When the model is about to make a high-risk decision, the safest response seems to be to let a person review it. In many real settings, that intuition is correct. For irreversible, costly, or highly sensitive actions, human involvement can be indispensable.
+
+But involving a human is not the same as effective oversight. Many systems introduce human-in-the-loop controls and assume that if a user clicks a confirmation button, safety has improved. This is too optimistic. Human attention, patience, and judgment quality are limited.
+
+If the system asks for confirmation too frequently, decision fatigue appears. Users move from careful review to mechanical approval. Human-in-the-loop then degrades from effective oversight into a formal ritual.
+
+A common workplace example is an agent that asks for confirmation every time it sends an email, shares a document, changes a meeting, or downloads an attachment. At first, these prompts look like additional safety. But users quickly develop a reflex: approve without reading. The system keeps the appearance of human oversight, while the real oversight has turned into decoration.
+
+> Humans can handle complex value judgments better than models, but humans are not infinite, stable, high-quality supervision machines.
+
+The key is not whether a human is present. The key is when the human appears. The important research question for human-in-the-loop systems is not how to involve humans more often, but how to reserve human attention for the moments where it matters most.
+
+### 2. The Rule Anchor
+
+If human anchors are best suited for a small number of high-value decisions, rule anchors are better suited for frequent, stable, automatable restrictions. People get tired, distracted, and worn down by interaction costs. Rules, if designed well, can execute consistently and repeatedly.
+
+Here, "rules" does not mean only simple if-else logic. It refers to any mechanism that can be reliably enforced by the system to constrain the action space: permission limits, data access controls, tool-call conditions, state-transition constraints, identity and role binding, lifecycle limits, task-level least privilege, source trust layering, risk classification, and audit mechanisms.
+
+The core value of rules is not that they improve the model's average judgment. Their value is that when the model is wrong, the system does not immediately escape its safe operating range. Rules do not answer whether the model is smart enough. They answer whether the consequences remain controlled when the model makes a mistake.
+
+Consider a travel-booking agent. It can search flights, book hotels, order rides, and submit reimbursement requests. A mature system should not merely expect the model to know when to be careful. It should explicitly enforce constraints: no booking without budget confirmation, no access to travel documents without identity verification, no cross-platform itinerary sharing without user confirmation, and automatic revocation of temporary access when the task ends. These are not acts of model benevolence. They are system-level constraints written in advance.
+
+Two mechanisms become especially important in an engineering implementation.
+
+The first is **taint tracking**. Text from webpages, emails, or third-party tools can be labeled as low-trust input inside the system. If the model attempts to pass that information into a high-privilege execution module, such as sending email, exporting files, or calling a payment tool, the rule layer can block it directly.
+
+The second is **ephemeral credentials**. More mature agent safety architectures will likely avoid giving models broad, long-lived permissions. Instead, they will issue temporary tokens according to the task: access only a specific calendar, read but not write, expire immediately after task completion.
+
+Both mechanisms reinforce the same point: rules do not replace model decision-making. They ensure that when model decisions are wrong, the system still does not easily leave a reasonable safety boundary.
 
 ---
 
-## 四、从漏洞修补到系统治理
+## 3. Prompt Injection Revisited: From Cleaning the Mind to Constraining the Hands
 
-写到这里，前面的几个部分已经分别讨论了几件事：Agent 安全为什么不能再只从内容安全理解；为什么单纯优化模型本身不足以构成安全保证；为什么必须从系统外部增加确定性锚点；人类锚点为什么重要，但又为什么不能被无限依赖；规则锚点为什么更适合承担高频限制；注入攻击为什么会成为开放环境中外部锚点失效的集中体现。
+Prompt injection is dangerous not only because a model can be tricked by a malicious prompt. It is dangerous because it reveals a deeper fact about agent systems: the system must read external information to complete tasks, and that external information is itself untrusted. OWASP continues to list prompt injection as one of the core risks for GenAI applications.
 
-如果这些内容只是并列摆放，它们仍然像是一组相关但分散的话题。但真正重要的是，这些内容并不是彼此独立的判断，而是可以被收束进同一个更高层的理解框架里。
+The most important point is that we should not remain overly optimistic about prompt injection. It is tempting to believe that if the system prompt is strong enough, or if sources are labeled clearly enough, the model will reliably separate instructions from data. Reality is not so simple. Once external text enters the context window of a modern language model, it is processed in the same semantic reasoning stream. In other words, the confusion between data and control is not an occasional bug. It is a structural difficulty in the model architecture.
 
-无论是 prompt injection、记忆过度召回、工具误调用、行为漂移，还是 Human in the Loop 的失效，它们表面上发生在不同模块，实际上都指向同一个结构性矛盾：**一个以概率推断为基础的系统，正在开放环境中承担原本需要确定性支撑的决策职责。**
+Once we accept this, the defensive strategy must change. The question is no longer how to ensure that the model is never influenced. The question is how the system avoids real damage after the model has been influenced. This is why a better principle for prompt injection is not "assume interception succeeds," but "assume compromise." Recent security guidance from Microsoft makes a similar point: indirect injection, out-of-bound tool use, and high-impact mistaken operations should be treated as execution risks that require system-level controls.
 
-把这些问题统一起来，意义并不只是让概念看起来更整齐。更重要的是，它会改变我们研究和设计安全机制的方式。
+This brings us back to rule anchors. For injection, instead of placing all hope in text filtering, the system should directly control the blast radius: do not allow external email reading contexts to call outbound messaging tools; issue read-only temporary tokens; revoke permissions after the task ends. A more advanced implementation could dynamically downgrade permissions based on context. When an agent is processing an unfamiliar webpage, external email, or third-party document, the system can remove high-risk capabilities such as sending email, editing calendars, or making payments. Those permissions return only after the context is cleared, the task is reconfirmed, or a strong human check is completed.
 
-如果把 Agent 安全看成一组分散漏洞，那么很自然的做法就是围绕每个现象分别打补丁：注入攻击加一个检测器，工具调用加一个黑名单，记忆访问加一个过滤器，人工确认多弹一个框。这样做当然有价值，但很容易让系统越来越碎，也很难回答一个更本质的问题：为什么这些问题总会反复出现？
+In this design, even if prompt injection succeeds and the model produces a dangerous instruction, the system layer refuses to execute it. What is protected is not the model's thoughts, but the system's capacity to act.
 
-而一旦把它们放进同一个框架里，你就会发现，真正值得处理的不是某一个具体现象，而是那条贯穿始终的风险链：模型如何理解输入、系统如何区分信息来源、哪些信息可以进入决策、决策如何转成执行、执行范围由谁来收紧、出错之后如何限制后果、保留审计并实现纠偏。
+Prompt injection therefore proves something deeper than "models are not smart enough." It shows that if a model's probabilistic judgment is inevitably influenced by untrusted environments, safety cannot mainly rely on the model's internal ability to distinguish trusted from untrusted input. It must rely on deterministic structures outside the model. Prompt injection is not an isolated vulnerability. It is the clearest example of the broader argument: when an uncertain decision system enters an open environment, what saves the system is not hoping the model will never be manipulated, but ensuring that even when it is manipulated, it does not have enough authority to cause serious harm.
 
-这也是为什么，我更愿意把 Agent 安全理解为“治理”而不是“防御”。因为它面对的不是一个单点漏洞，而是一整套运行秩序的问题。
+---
 
-如果要把“未来问题”收束成更少、更本质的工程挑战，我认为至少有三类。
+## 4. From Vulnerability Patching to System Governance
 
-第一，从“人工确认”走向“偏好沉淀”。关键不只是何时触发 Human in the Loop，而是如何避免它退化为机械点击，并进一步把一次有效的人类判断沉淀为后续可复用的规则与偏好。
+The previous sections have discussed several points: why agent safety can no longer be understood only as content safety; why improving the model alone is not a safety guarantee; why deterministic anchors must be added outside the model; why human anchors matter but cannot be relied on infinitely; why rule anchors are better suited for high-frequency constraints; and why prompt injection is a concentrated example of external anchors failing in open environments.
 
-第二，构建跨信息源的信任与权限模型。system、user、网页、文档、邮件、工具返回值，形式上都是文本，但它们的可信等级和控制权限并不一样。这个问题如果做深，已经不只是 prompt injection 防御，而是在做输入侧的信任与权限建模。
+If these points were merely placed side by side, they would still look like related but scattered topics. What matters is that they can be pulled into a single higher-level framework.
 
-第三，让安全机制覆盖长链任务。Agent 的很多风险不是单步发生的，而是沿着多步计划、状态更新和工具调用一路累积、放大。因此，真正成熟的 Agent 安全，不应只是静态防御，而应具备过程治理能力。
+Prompt injection, over-retrieval from memory, tool misuse, behavioral drift, and the failure modes of human-in-the-loop systems appear in different modules. But they all point to the same structural tension: **a system based on probabilistic inference is taking on decision responsibilities that require deterministic support.**
 
-> 安全的目标，从来不是让模型变成一个永不犯错的理性体，而是在承认其不确定性的前提下，为它设计一个不会轻易失控的世界。
+Unifying these problems is not only conceptually cleaner. It changes how we design and study safety mechanisms.
 
-如果重新回看整篇文章，其实核心问题一直没有变：为什么大模型 / Agent 的安全会变得比传统内容安全复杂得多？答案就在于，模型的角色已经变了。它不再只是一个生成文本的工具，而越来越像一个在开放环境中持续理解、持续判断、持续行动的决策体。
+If we treat agent safety as a set of scattered vulnerabilities, the natural response is to patch each phenomenon separately: add a detector for injection attacks, add a blacklist for tool calls, add a filter for memory access, add another confirmation prompt for human approval. These patches can be valuable, but they easily make the system fragmented. They also do not answer the deeper question: why do these problems keep reappearing?
 
-因此，Agent 安全的核心，并不是围绕某一种攻击不断打补丁，也不是试图追求一个永不犯错的模型。它更像是在承认一个现实：模型不可能绝对可靠，但系统仍然必须可靠。
+Once we place them in the same framework, the real object of concern is no longer any single phenomenon. It is the whole risk chain: how the model understands input, how the system distinguishes information sources, which information may enter decision-making, how decisions become execution, who tightens the action range, how consequences are limited after errors, and how audit trails support correction.
 
-真正值得做的，不只是提高模型的正确率，而是为这种概率性智能设计一个可运行的世界：信息源有分层，权限有最小化收紧，高风险动作有人或规则把关，错误不会轻易放大成不可收拾的后果。
+This is why I prefer to understand agent safety as governance rather than defense. It is not facing one single vulnerability. It is shaping an entire operating order.
 
+If we compress the future agenda into a few fundamental engineering challenges, at least three stand out.
+
+First, move from human confirmation to preference sedimentation. The key is not only when to trigger human-in-the-loop, but how to prevent it from degrading into mechanical clicking, and how to turn one meaningful human judgment into reusable future rules and preferences.
+
+Second, build a trust and permission model across information sources. System messages, user instructions, webpages, documents, emails, and tool outputs may all look like text, but they do not have the same trust level or control authority. Taken seriously, this is not merely prompt injection defense. It is trust and permission modeling on the input side.
+
+Third, make safety mechanisms cover long-chain tasks. Many agent risks do not happen in a single step. They accumulate and amplify across multi-step plans, state updates, and tool calls. Mature agent safety should therefore not be only static defense. It needs process governance.
+
+> The goal of safety is not to turn the model into an error-free rational actor. The goal is to acknowledge uncertainty and design a world in which that uncertainty does not easily spiral out of control.
+
+Looking back at the full essay, the central question has stayed the same: why has the safety of large models and agents become so much more complex than traditional content safety? The answer is that the model's role has changed. It is no longer only a text-generation tool. It increasingly resembles a decision-making entity that continuously understands, judges, and acts in an open environment.
+
+Therefore, the core of agent safety is not to keep patching around one specific attack, nor to pursue a model that never makes mistakes. It is to accept a reality: models will not be absolutely reliable, but systems still must be reliable.
+
+The work worth doing is not only to improve model accuracy. It is to design an operating world for probabilistic intelligence: information sources are layered, permissions are minimized and tightened, high-risk actions are checked by humans or rules, and errors do not easily grow into irreversible consequences.
