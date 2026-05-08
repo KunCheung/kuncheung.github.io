@@ -179,7 +179,7 @@ function App() {
       role: "Privacy and Security Researcher",
       location: "Shenzhen, China",
       summary:
-        "I am a postdoctoral researcher at Huawei, working with Dr. Tieyan Li on digital identity, trust, and privacy for LLM-based agents. I received my Ph.D. from the University of Delaware, where I was advised by Prof. Rui Zhang and worked on security and privacy in AI and cloud computing systems.\n\nMy research interests include Privacy-Enhancing Technologies, Agent Security and Privacy, with a focus on building trustworthy AI agents that protect sensitive data across its entire lifecycle.",
+        "I recently completed my postdoctoral research at Huawei, where I worked with Dr. Tieyan Li on digital identity, trust, and privacy for LLM-based agents. I received my Ph.D. from the University of Delaware, where I was advised by Prof. Rui Zhang and worked on security and privacy in AI and cloud computing systems.\n\nMy research interests include Privacy-Enhancing Technologies, Agent Security and Privacy, with a focus on building trustworthy AI agents that protect sensitive data across its entire lifecycle.",
     }),
     [],
   );
