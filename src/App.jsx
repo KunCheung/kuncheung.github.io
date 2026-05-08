@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 const navItems = [
   { id: "intro", label: "Intro" },
   { id: "updates", label: "Updates" },
-  { id: "projects", label: "Projects" },
+  // { id: "projects", label: "Projects" },
   { id: "publishing", label: "Publications" },
   { id: "writing", label: "Writing" },
   { id: "contact", label: "Contact" },
@@ -13,7 +13,7 @@ const updates = [
   {
     date: "2026.05.01",
     title: "PrivGate accepted to ICML 2026",
-    body: "Thrilled to share that our paper \"PrivGate: Securing Contextual Integrity for LLM Agents via Latent Privacy Signals\" has been accepted to ICML.",
+    body: "Thrilled to share that our paper \"PrivGate: Steering Contextual Integrity in LLMs via Latent Space Geometry\" has been accepted to ICML.",
     href: "https://openreview.net/pdf?id=oKizUOP7E4",
   },
 ];
@@ -41,11 +41,11 @@ const posts = [
 const publications = [
   {
     title:
-      "PrivGate: Securing Contextual Integrity for LLM Agents via Latent Privacy Signals",
+      "PrivGate: Steering Contextual Integrity in LLMs via Latent Space Geometry",
     authors: "Runshan Hu, Yukun Dong, Yingying Huangfu, Ruohan Zhao, Yi Xie, and Tieyan Li",
     venue:
       "The 43rd International Conference on Machine Learning (ICML 2026)",
-    href: "https://openreview.net/pdf?id=oKizUOP7E4",
+    href: "https://icml.cc/virtual/2026/poster/61631",
   },
   {
     title: "Privacy-Preserving Ridesharing via Probabilistic Matching",
@@ -93,7 +93,7 @@ const publications = [
     authors: "Yukun Dong, Jinyu Wang, Fenghua Chen, Yong Hu, and Yong Deng",
     venue: "Mathematical Problems in Engineering, 2017",
     href: "https://doi.org/10.1155/2017/4628501",
-  },
+  }
 ];
 
 const links = [
@@ -170,11 +170,12 @@ function App() {
     document.title = activeArticle
       ? `${activeArticle.title} - Personal Homepage`
       : "Personal Homepage";
-  }, [activeArticle]); 
+  }, [activeArticle]);
 
   const profile = useMemo(
     () => ({
       name: "Yukun Dong",
+      nativeName: "(董昱坤)",
       role: "Privacy and Security Researcher",
       location: "Shenzhen, China",
       summary:
@@ -220,8 +221,8 @@ function HomePage({ profile }) {
           <p className="eyebrow">Personal OS</p>
           <p className="lead">{profile.summary}</p>
           <div className="intro-actions" aria-label="Primary actions">
-            <a className="primary-link" href="#projects">
-              View Projects
+            <a className="primary-link" href="#publishing">
+              View Publications
             </a>
           </div>
         </div>
@@ -229,24 +230,21 @@ function HomePage({ profile }) {
 
       <Section id="updates" label="Updates">
         <div className="section-heading">
-          <p className="eyebrow">Updates</p>
-          <h2>Latest News</h2>
+          <p className="eyebrow">Latest News</p>
         </div>
         <NowList updates={updates} />
       </Section>
 
-      <Section id="projects" label="Selected Work">
+      {/* <Section id="projects" label="Projects">
         <div className="section-heading">
-          <p className="eyebrow">Selected Work</p>
-          <h2>Selected Projects</h2>
+          <p className="eyebrow">Projects</p>
         </div>
         <ProjectList projects={projects} />
-      </Section>
+      </Section> */}
 
       <Section id="publishing" label="Publications">
         <div className="section-heading">
           <p className="eyebrow">Publications</p>
-          <h2>Publications</h2>
         </div>
         <div className="publication-list">
           {publications.map((publication) => (
@@ -265,7 +263,6 @@ function HomePage({ profile }) {
       <Section id="writing" label="Writing">
         <div className="section-heading">
           <p className="eyebrow">Writing</p>
-          <h2>Writing and Notes</h2>
         </div>
         <div className="writing-list">
           {posts.map((post) => (
@@ -282,8 +279,7 @@ function HomePage({ profile }) {
           <div>
             <p className="eyebrow">Contact</p>
             <h2>
-              Open to conversations about security, privacy, agent safety, and
-              reliable systems.
+              Feel free to reach out if you'd like to connect, collaborate, or just say hi!
             </h2>
           </div>
           <LinkDock links={links} />
@@ -482,6 +478,7 @@ function Sidebar({ activeSection, profile, setTheme, theme }) {
         />
         <div>
           <p className="profile-name">{profile.name}</p>
+          <p className="profile-native-name">{profile.nativeName}</p>
           <p className="profile-role">{profile.role}</p>
           <p className="profile-location">{profile.location}</p>
         </div>
@@ -514,6 +511,7 @@ function MobileHeader({ activeSection, profile, setTheme, theme }) {
       <div className="mobile-topline">
         <a className="mobile-brand" href="#intro">
           <span>{profile.name}</span>
+          <span className="mobile-native-name">{profile.nativeName}</span>
           <small>{profile.role}</small>
         </a>
         <ThemeToggle setTheme={setTheme} theme={theme} />

@@ -122,6 +122,14 @@ svg {
   font-weight: 700;
 }
 
+.profile-native-name {
+  margin: 3px 0 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
 .profile-role,
 .profile-location {
   margin: 4px 0 0;
@@ -247,12 +255,11 @@ svg {
 
 .page-section {
   scroll-margin-top: 24px;
-  padding: 72px 0;
+  padding: 48px 0 32px;
   border-bottom: 1px solid var(--line);
 }
 
 .page-section:first-child {
-  min-height: 88vh;
   padding-top: 48px;
 }
 
@@ -267,7 +274,7 @@ svg {
 .eyebrow {
   margin: 0 0 14px;
   color: var(--warm);
-  font-size: 12px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -342,7 +349,11 @@ h3 {
 .section-heading {
   display: grid;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+}
+
+.section-heading .eyebrow {
+  margin: 0;
 }
 
 .timeline {
@@ -362,7 +373,7 @@ h3 {
 }
 
 .timeline li:last-child {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 0;
 }
 
 .timeline time {
@@ -386,12 +397,12 @@ h3 {
 }
 
 .project-card {
-  min-height: 240px;
+  min-height: 180px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 20px;
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .project-card-topline {
@@ -439,6 +450,10 @@ h3 {
   color: var(--text);
 }
 
+.writing-item:last-child {
+  border-bottom: 0;
+}
+
 .writing-item span {
   font-size: 16px;
   font-weight: 700;
@@ -464,6 +479,10 @@ h3 {
   gap: 8px;
   padding: 22px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.publication-item:last-child {
+  border-bottom: 0;
 }
 
 .publication-item h3 {
@@ -498,7 +517,8 @@ h3 {
 
 .contact-panel h2 {
   max-width: 620px;
-  line-height: 1.35;
+  font-size: 18px;
+  line-height: 1.55;
 }
 
 .article-page {
@@ -671,6 +691,11 @@ button:focus-visible {
     white-space: nowrap;
   }
 
+  .mobile-brand .mobile-native-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
   .mobile-brand small {
     overflow: hidden;
     color: var(--muted);
@@ -702,12 +727,11 @@ button:focus-visible {
 
   .page-section {
     scroll-margin-top: 112px;
-    padding: 52px 0;
+    padding: 40px 0 28px;
   }
 
   .page-section:first-child {
-    min-height: auto;
-    padding-top: 48px;
+    padding-top: 40px;
   }
 
   h1 {
