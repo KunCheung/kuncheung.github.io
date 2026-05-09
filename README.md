@@ -1,6 +1,6 @@
 # kuncheung-homepage
 
-A personal homepage built with Vite and React. The site is content-first and includes an intro, current focus, selected projects, writing, publications, and contact links.
+A personal homepage built with Vite and React. The site is content-first and includes an intro, updates, publications, writing, and contact links.
 
 ## Development
 
@@ -30,10 +30,8 @@ npm run preview
 
 ## Content
 
-- Homepage content is maintained in the data arrays in `src/App.jsx`, such as `updates`, `projects`, `posts`, `publications`, and `links`.
-- Article Markdown files live in `public/articles/`. The current article is `public/articles/agent-safety-core.md`.
-- The writing section opens articles through `#/articles/<slug>`. React fetches the Markdown file and renders it as an in-site article page.
-- The profile placeholder image lives at `public/profile-placeholder.svg`. Replace that file with a real image when ready.
+- Homepage content is maintained in the data arrays in `src/App.jsx`, such as `updates`, `posts`, `publications`, and `links`.
+
 
 ## Deployment Notes
 

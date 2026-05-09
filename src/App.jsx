@@ -33,9 +33,18 @@ const posts = [
     title: "The Core of Agent Safety Is Constraining Uncertain Decision Systems",
     meta: "Agent Safety / 2026-03-12 / 12 min",
     href: "#/articles/agent-safety-core",
-    source: `${import.meta.env.BASE_URL}articles/agent-safety-core.md`,
+    defaultLanguage: "cn",
+    sources: {
+      cn: `${import.meta.env.BASE_URL}articles/agent-safety-core_CN.md`,
+      en: `${import.meta.env.BASE_URL}articles/agent-safety-core-EN.md`,
+    },
     slug: "agent-safety-core",
   },
+];
+
+const articleLanguageOptions = [
+  { id: "cn", label: "中文" },
+  { id: "en", label: "English" },
 ];
 
 const publications = [
@@ -292,12 +301,35 @@ function HomePage({ profile }) {
 function ArticlePage({ article }) {
   const [markdown, setMarkdown] = useState("");
   const [status, setStatus] = useState("loading");
+  const languageOptions = articleLanguageOptions.filter(
+    (option) => article.sources?.[option.id],
+  );
+  const fallbackLanguage =
+    article.defaultLanguage ?? languageOptions[0]?.id ?? "cn";
+  const [language, setLanguage] = useState(fallbackLanguage);
+  const activeSource =
+    article.sources?.[language] ??
+    article.sources?.[fallbackLanguage] ??
+    Object.values(article.sources ?? {})[0];
+
+  useEffect(() => {
+    setLanguage(fallbackLanguage);
+  }, [article.slug, fallbackLanguage]);
 
   useEffect(() => {
     let isCurrent = true;
 
     setStatus("loading");
-    fetch(article.source)
+    setMarkdown("");
+
+    if (!activeSource) {
+      setStatus("error");
+      return () => {
+        isCurrent = false;
+      };
+    }
+
+    fetch(activeSource)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to load article: ${response.status}`);
@@ -319,13 +351,30 @@ function ArticlePage({ article }) {
     return () => {
       isCurrent = false;
     };
-  }, [article.source]);
+  }, [activeSource]);
 
   return (
     <article className="article-page">
-      <a className="back-link" href="#writing">
-        Back to Writing
-      </a>
+      <div className="article-topbar">
+        <a className="back-link" href="#writing">
+          Back to Writing
+        </a>
+        {languageOptions.length > 1 && (
+          <div className="language-switch" aria-label="Article language">
+            {languageOptions.map((option) => (
+              <button
+                aria-pressed={language === option.id}
+                className={language === option.id ? "active" : ""}
+                key={option.id}
+                onClick={() => setLanguage(option.id)}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="article-meta">
         <p className="eyebrow">Writing</p>
         <span>{article.meta}</span>
