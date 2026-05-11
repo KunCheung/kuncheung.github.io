@@ -31,7 +31,7 @@ const projects = [
 const posts = [
   {
     title: "The Core of Agent Safety Is Constraining Uncertain Decision Systems",
-    meta: "Agent Safety / 2026-03-12 / 12 min",
+    meta: "Agent Safety / 2026-02-20 / 12 min",
     href: "#/articles/agent-safety-core",
     defaultLanguage: "cn",
     sources: {
