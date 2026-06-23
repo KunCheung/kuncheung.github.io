@@ -24,7 +24,7 @@ A personal assistant agent that can access email, calendars, cloud storage, and 
 
 The real problem may not appear as an obviously dangerous sentence. It may appear as the agent mistaking marketing copy on a webpage for task instructions, reading private email that was not needed, defaulting to a booking without confirming the budget, or gradually pushing a task toward an outcome the user did not actually want through a sequence of locally plausible steps.
 
-This example is enough to show that the core risk of agents is not content generation. The core risk is that they keep making judgments under incomplete information, and those judgments flow through a chain of reading information, calling tools, changing state, and taking action.
+This example is enough to show that the core risk of agents is that they keep making judgments under incomplete information, and those judgments flow through a chain of reading information, calling tools, changing state, and taking action.
 
 For that reason, a more realistic starting point for agent safety is this: an agent is no longer merely a model that answers questions. It is a decision-making system that continuously interprets the environment, updates state, calls tools, and executes tasks.
 
@@ -78,7 +78,7 @@ A common workplace example is an agent that asks for confirmation every time it 
 
 > Humans can handle complex value judgments better than models, but humans are not infinite, stable, high-quality supervision machines.
 
-The key is not whether a human is present. The key is when the human appears. The important research question for human-in-the-loop systems is not how to involve humans more often, but how to reserve human attention for the moments where it matters most.
+The key is when the human appears, how to reserve human attention for the moments where it matters most.
 
 ### 2. The Rule Anchor
 
@@ -96,7 +96,7 @@ The first is **taint tracking**. Text from webpages, emails, or third-party tool
 
 The second is **ephemeral credentials**. More mature agent safety architectures will likely avoid giving models broad, long-lived permissions. Instead, they will issue temporary tokens according to the task: access only a specific calendar, read but not write, expire immediately after task completion.
 
-Both mechanisms reinforce the same point: rules do not replace model decision-making. They ensure that when model decisions are wrong, the system still does not easily leave a reasonable safety boundary.
+Both mechanisms reinforce the same point: rules ensure that when model decisions are wrong, the system still does not easily leave a reasonable safety boundary.
 
 ---
 
@@ -106,13 +106,13 @@ Prompt injection is dangerous not only because a model can be tricked by a malic
 
 The most important point is that we should not remain overly optimistic about prompt injection. It is tempting to believe that if the system prompt is strong enough, or if sources are labeled clearly enough, the model will reliably separate instructions from data. Reality is not so simple. Once external text enters the context window of a modern language model, it is processed in the same semantic reasoning stream. In other words, the confusion between data and control is not an occasional bug. It is a structural difficulty in the model architecture.
 
-Once we accept this, the defensive strategy must change. The question is no longer how to ensure that the model is never influenced. The question is how the system avoids real damage after the model has been influenced. This is why a better principle for prompt injection is not "assume interception succeeds," but "assume compromise." Recent security guidance from Microsoft makes a similar point: indirect injection, out-of-bound tool use, and high-impact mistaken operations should be treated as execution risks that require system-level controls.
+Once we accept this, the defensive strategy must change. The question is no longer how to ensure that the model is never influenced. The question is how the system avoids real damage after the model has been influenced. This is why a better principle for prompt injection is "assume compromise" or "zero trust". Recent security guidance from Microsoft makes a similar point: indirect injection, out-of-bound tool use, and high-impact mistaken operations should be treated as execution risks that require system-level controls.
 
 This brings us back to rule anchors. For injection, instead of placing all hope in text filtering, the system should directly control the blast radius: do not allow external email reading contexts to call outbound messaging tools; issue read-only temporary tokens; revoke permissions after the task ends. A more advanced implementation could dynamically downgrade permissions based on context. When an agent is processing an unfamiliar webpage, external email, or third-party document, the system can remove high-risk capabilities such as sending email, editing calendars, or making payments. Those permissions return only after the context is cleared, the task is reconfirmed, or a strong human check is completed.
 
-In this design, even if prompt injection succeeds and the model produces a dangerous instruction, the system layer refuses to execute it. What is protected is not the model's thoughts, but the system's capacity to act.
+In this design, even if prompt injection succeeds and the model produces a dangerous instruction, the system layer refuses to execute it. What is protected is the system's capacity to act.
 
-Prompt injection therefore proves something deeper than "models are not smart enough." It shows that if a model's probabilistic judgment is inevitably influenced by untrusted environments, safety cannot mainly rely on the model's internal ability to distinguish trusted from untrusted input. It must rely on deterministic structures outside the model. Prompt injection is not an isolated vulnerability. It is the clearest example of the broader argument: when an uncertain decision system enters an open environment, what saves the system is not hoping the model will never be manipulated, but ensuring that even when it is manipulated, it does not have enough authority to cause serious harm.
+Prompt injection therefore proves something deeper than "models are not smart enough." It shows that if a model's probabilistic judgment is inevitably influenced by untrusted environments, safety cannot mainly rely on the model's internal ability to distinguish trusted from untrusted input. It must rely on deterministic structures outside the model.
 
 ---
 
@@ -128,7 +128,7 @@ Unifying these problems is not only conceptually cleaner. It changes how we desi
 
 If we treat agent safety as a set of scattered vulnerabilities, the natural response is to patch each phenomenon separately: add a detector for injection attacks, add a blacklist for tool calls, add a filter for memory access, add another confirmation prompt for human approval. These patches can be valuable, but they easily make the system fragmented. They also do not answer the deeper question: why do these problems keep reappearing?
 
-Once we place them in the same framework, the real object of concern is no longer any single phenomenon. It is the whole risk chain: how the model understands input, how the system distinguishes information sources, which information may enter decision-making, how decisions become execution, who tightens the action range, how consequences are limited after errors, and how audit trails support correction.
+Once we place them in the same framework, the real object of concern is the whole risk chain: how the model understands input, how the system distinguishes information sources, which information may enter decision-making, how decisions become execution, who tightens the action range, how consequences are limited after errors, and how audit trails support correction.
 
 This is why I prefer to understand agent safety as governance rather than defense. It is not facing one single vulnerability. It is shaping an entire operating order.
 
@@ -142,8 +142,9 @@ Third, make safety mechanisms cover long-chain tasks. Many agent risks do not ha
 
 > The goal of safety is not to turn the model into an error-free rational actor. The goal is to acknowledge uncertainty and design a world in which that uncertainty does not easily spiral out of control.
 
-Looking back at the full essay, the central question has stayed the same: why has the safety of large models and agents become so much more complex than traditional content safety? The answer is that the model's role has changed. It is no longer only a text-generation tool. It increasingly resembles a decision-making entity that continuously understands, judges, and acts in an open environment.
+Looking back at the entire article, the central question remains unchanged: why has the security of large language models and agents become far more complex than traditional content safety?
 
-Therefore, the core of agent safety is not to keep patching around one specific attack, nor to pursue a model that never makes mistakes. It is to accept a reality: models will not be absolutely reliable, but systems still must be reliable.
+The fundamental reason is that the role of the model has changed. It is no longer merely a tool for generating text; it is increasingly becoming a decision-making entity that continuously understands, judges, and acts in open environments. For this reason, agent security can no longer be reduced to patching individual attacks, nor can it rely on the hope of training a model that never makes mistakes.
 
-The work worth doing is not only to improve model accuracy. It is to design an operating world for probabilistic intelligence: information sources are layered, permissions are minimized and tightened, high-risk actions are checked by humans or rules, and errors do not easily grow into irreversible consequences.
+A more realistic goal is to acknowledge the probabilistic and uncertain nature of these models while ensuring that the overall system remains reliable. What truly needs to be built an operational framework suited to probabilistic intelligence: information sources should be tiered, permissions should be minimized, high-risk actions should be governed by human oversight or explicit rules, and errors should be contained within controllable boundaries rather than automatically amplified into irreversible consequences.
+
