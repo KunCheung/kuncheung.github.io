@@ -1,6 +1,6 @@
 # The Core of Agent Safety Is Constraining Uncertain Decision Systems
 
-Consider a personal assistant agent with access to email, calendars, cloud storage, and a browser. The user asks: "Help me arrange my business trip to Tokyo next week." The agent will read emails to confirm the itinerary, check the calendar for openings, search for hotels, consult maps, and perhaps prepare a booking.
+Consider a personal assistant agent with access to email, calendars, cloud storage, and a browser. The user asks: "Help me arrange my business trip to Shanghai next week." The agent will read emails to confirm the itinerary, check the calendar for openings, search for hotels, consult maps, and perhaps prepare a booking.
 
 An error may never appear in its reply. It might treat marketing copy on a webpage as a task instruction, read private emails it does not need, or proceed with a booking before the budget is confirmed. Each step may seem reasonable on its own, yet together they can lead to an outcome the user did not want.
 

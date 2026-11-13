@@ -4,4 +4,4 @@ dist
 .vite
 *.local
 private
-.public
+public
