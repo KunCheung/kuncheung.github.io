@@ -1,150 +1,81 @@
 # The Core of Agent Safety Is Constraining Uncertain Decision Systems
 
-When people talk about large model safety, the first instinct is often to look at outputs: will the model jailbreak, hallucinate, or leak private information?
+Consider a personal assistant agent with access to email, calendars, cloud storage, and a browser. The user asks: "Help me arrange my business trip to Tokyo next week." The agent will read emails to confirm the itinerary, check the calendar for openings, search for hotels, consult maps, and perhaps prepare a booking.
 
-For the past few years, those have indeed been central concerns. But as OpenClaw, Claude Code, and system-level mobile agents move into real environments, agents have moved beyond simply answering questions. They now help users do things: read the environment, call tools, execute operations, and even complete tasks across applications.
+An error may never appear in its reply. It might treat marketing copy on a webpage as a task instruction, read private emails it does not need, or proceed with a booking before the budget is confirmed. Each step may seem reasonable on its own, yet together they can lead to an outcome the user did not want.
 
-Once the object of discussion changes from a passive conversational model to a decision-making entity that can read context, call tools, and take actions, the center of gravity in safety also changes.
+## 1. From Answering Questions to Making Decisions
 
-The most important question is no longer only what the model says at the end. It is how the agent understands the environment, what it uses as the basis for judgment, and how those probabilistic judgments are converted into real actions that may be hard to reverse.
+For the past few years, much of the discussion about large language model safety has focused on outputs: jailbreaks, hallucinations, and privacy leaks. These have been central concerns. With OpenClaw, Claude Code, and agents integrated into mobile operating systems entering practical use, agents now read their environment, call tools, and perform tasks across applications. Checking the final answer no longer covers the risks of these systems.
 
-In other words, agent safety is first a decision-systems engineering problem, and only second a content-filtering problem.
+As an agent works, it interprets the environment, updates its state, and makes judgments with incomplete information. Through tool calls, those judgments become data access, state changes, and sometimes irreversible actions. Open environments mix information from different sources, while longer task sequences give errors more opportunities to accumulate and amplify.
 
-This is the core claim of this essay: **the safety challenge of agents is not primarily what content they generate, but what real actions they take in open and uncertain environments.**
+Several familiar risks occur along this same decision chain. Prompt injection lets a low-trust source influence high-privilege decisions. Excessive memory retrieval gives the system access to information it should not use. Tool misuse turns a probabilistic judgment directly into deterministic execution. Behavioral drift allows the original goal and constraints to fade over a long task.
 
-If we accept that models are inherently imperfect and cannot be made fully reliable, then the central question in safety research is no longer how to tune a model until it is always correct. It is: **how do we pair an uncertain probabilistic decision engine with external deterministic structures that can keep it bounded?**
+Agent safety is therefore first a decision-systems engineering problem. We need to constrain a system that keeps making judgments and taking actions in an open environment, without any guarantee that it will always be right.
 
----
+## 2. Deterministic Anchors Outside the Model
 
-## 1. Redefining the Problem: The Core Risk of Agents Is Decision Risk
+Improving the model's judgment remains essential. Weak understanding, reasoning, or task following leaves downstream safety mechanisms reacting to problems the model creates.
 
-Consider a concrete scenario.
+There are already many approaches: post-training methods such as SFT, RLHF, and DPO; reasoning and prompting methods such as chain-of-thought, ReAct, and task decomposition; role and context constraints through system prompts, personas, and task templates; external capabilities such as retrieval, tool use, and search; and reflection and feedback at runtime. All aim to make model behavior more consistent and better suited to the task.
 
-A personal assistant agent that can access email, calendars, cloud storage, and the browser receives a request: "Help me arrange my business trip to Tokyo next week." From that moment on, the risk is no longer just what the agent will say. The risk is what it will do. It may read emails to confirm the itinerary, inspect calendars for open slots, search for hotels, use maps, and perhaps even prepare a booking.
+But improving the distribution of model behavior does not establish which data the system must never access, which tools it must never call, or which external text it must never treat as a high-priority instruction.
 
-The real problem may not appear as an obviously dangerous sentence. It may appear as the agent mistaking marketing copy on a webpage for task instructions, reading private email that was not needed, defaulting to a booking without confirming the budget, or gradually pushing a task toward an outcome the user did not actually want through a sequence of locally plausible steps.
+A customer support agent trained with SFT and preference optimization, for example, may follow service scripts and respond correctly to most tickets. Once it can issue refunds, change prices, and inspect order details, another set of questions arises. Will it use a capability it should not use when the request is ambiguous, the context is confusing, or someone is deliberately misleading it? Have the conditions for a high-risk action actually been met? Alignment in language does not automatically provide hard constraints on execution.
 
-This example is enough to show that the core risk of agents is that they keep making judgments under incomplete information, and those judgments flow through a chain of reading information, calling tools, changing state, and taking action.
+Uncertainty in the model cannot be eliminated, so the system needs boundaries that hold when its judgment is wrong. Here, "deterministic anchors" refers to external supports established by the system, independent of the model's reasoning in the moment. What cannot be done, which actions must stop, and which decisions need additional confirmation should be constrained outside the model.
 
-For that reason, a more realistic starting point for agent safety is this: an agent is no longer merely a model that answers questions. It is a decision-making system that continuously interprets the environment, updates state, calls tools, and executes tasks.
+In practice, this often takes the form of a harness around the model. It does not think for the model; it organizes context, constrains calls, manages state and permissions, and adds checks, rollback, and auditing at critical points. The anchors fall into two broad groups. Human anchors handle a small number of high-value judgments; rule anchors enforce frequent restrictions and provide routine safeguards. Both are useful, and both can be misused.
 
-Open environments amplify the problem. Information sources are mixed, task chains are longer, and errors begin to have real consequences. The problem is no longer just lower answer quality. It can become over-reading data, abusing permissions, calling tools incorrectly, or triggering irreversible high-risk operations.
+### Human Anchors: Reserve Attention for Important Decisions
 
-So agent safety in open environments is fundamentally about one question: **how do we constrain an uncertain decision system?**
+For irreversible, costly, or sensitive actions, a person's final review can be indispensable. A confirmation click, however, is not the same as effective oversight.
 
-Once we view agents as decision systems operating in open environments, many familiar risks can be understood more naturally. Prompt injection becomes a low-trust source influencing high-privilege decisions. Over-retrieval from memory becomes the system accessing information that should not have been used. Tool misuse becomes a probabilistic judgment being converted directly into deterministic execution. Behavioral drift becomes the gradual loss of the original goal and constraints across a long task chain.
+A common example is an office agent that asks for approval every time it sends an email, shares a document, changes a meeting, or downloads an attachment. Users may read carefully at first, then start clicking "Allow" without checking. Repeated prompts consume attention, and decision fatigue turns review into mechanical approval. The human remains in the loop, but meaningful supervision has disappeared.
 
-These risks occur in different modules, but they share the same root problem: **a system based on probabilistic inference is taking on decision responsibilities that require stronger deterministic support.**
+People are better able to make complex value judgments, but their attention, patience, and judgment have limits. Designing human anchors means deciding where to involve a person so that limited attention goes to the decisions that most need it.
 
-> In the past, people tried to prevent the model from saying one wrong thing. In the agent era, we need to prevent the model from following a wrong path all the way into action.
+### Rule Anchors: Enforce Routine Restrictions Consistently
 
----
+Frequent, stable restrictions that can be automated are better handled by rules. People get tired and distracted. Well-designed rules can run repeatedly without requiring a fresh judgment each time.
 
-## 2. A Systemic Answer: Deterministic Anchors for Uncertain Decision Systems
+These rules include permission limits, data access controls, tool-call conditions, state-transition constraints, identity and role binding, lifecycle limits, task-level least privilege, source trust layering, risk classification, and auditing. They extend well beyond a few if-else statements. Their purpose is to limit the agent's actions so that a mistaken judgment does not immediately take the system beyond its safety boundaries.
 
-If the core risk of agents is that they make uncertain decisions based on incomplete understanding, then the most natural and important direction is to improve the model itself.
+Return to the travel-booking agent. It can search for flights, book hotels, arrange rides, and submit reimbursement requests. The system should establish constraints in advance: no booking before budget confirmation, no access to travel identity documents before identity verification, no sharing itineraries across platforms without user confirmation, and automatic revocation of temporary access when the task ends. The system needs to enforce these restrictions rather than rely on the model's restraint.
 
-This is not optional. It is a necessary line of work. Without stronger understanding, more stable reasoning, and better task following, many downstream safety designs become reactive and brittle. Model improvement is part of agent safety.
+Two mechanisms illustrate how this can work.
 
-Existing methods already cover a broad range of approaches: post-training such as SFT, RLHF, and DPO; reasoning and prompt optimization such as chain-of-thought, ReAct, and task decomposition; role mapping and contextual constraints such as system prompts, personas, and task templates; external capabilities such as retrieval, tool use, and search; and runtime self-correction through reflection and feedback.
+Taint tracking can label text from webpages, emails, or third-party tools as low-trust input. When the model attempts to pass information carrying those labels to a high-privilege execution module, such as email sending, file export, or payment, the execution engine blocks the operation through its rule layer.
 
-These methods differ in form, but their goal is similar: make the model more stable, consistent, and aligned with expectations in a given task. At the root, they try to solve the question: **how do we make the model do the right thing more often?**
+Ephemeral credentials limit the scope and duration of access. More mature agent safety architectures will likely issue temporary tokens for individual tasks instead of giving models broad, long-lived permissions. A token might grant access to one calendar, allow reading but not writing, and expire as soon as the task ends.
 
-But safety is not only about doing the right thing more often. It is also about not crossing boundaries when the model is wrong. Model optimization improves the behavior distribution, but it does not directly answer another class of questions: when must the model never access certain data, never call a certain tool, or never treat external text as high-priority instruction?
+## 3. Prompt Injection and Execution Boundaries
 
-A practical example is a customer support agent that has been fine-tuned and preference-optimized. It may follow service scripts well and respond correctly in most tickets. But if it also has the ability to issue refunds, change prices, or inspect order details, the key question is no longer only whether it answers well. The key question is whether, under ambiguous user descriptions, messy context, or malicious guidance, it will call capabilities it should not call or execute high-risk actions before the right conditions are met.
+Agents need external information to complete tasks, yet that information is untrusted. Prompt injection exploits this tension. OWASP continues to list it among the core risks for GenAI applications.
 
-In other words, a model can be linguistically aligned while still lacking hard execution-level constraints. This is the practical version of the claim that model optimization matters, but does not equal system safety.
+A well-written system prompt and clear source labels do not mean the model can reliably separate instructions from data. The model interprets external text in the same reasoning process as the rest of its context. The resulting confusion between data and control is difficult to eliminate at the architectural level.
 
-If the first path tries to reduce uncertainty, the second path starts from a more realistic premise: **uncertainty will not disappear, so the system must remain reliable even while uncertainty exists.**
+Defenses therefore need to account for a model that has already been influenced. An "assume compromise" or "zero trust" approach focuses on preventing the damage that could follow. Recent Microsoft security guidance also treats indirect injection, tool use beyond authorized boundaries, and high-impact mistaken actions as execution risks requiring system-level controls.
 
-That is the purpose of deterministic anchors. They are not meant to eliminate uncertainty inside the model. They are meant to prevent that uncertainty from leaking outward, accumulating, and becoming real risk.
+Rule anchors have a direct role here. Prevent outbound tool calls while the agent reads unfamiliar emails, issue read-only temporary tokens, and revoke permissions when the task ends. These restrictions can contain the consequences after an injection occurs.
 
-In engineering terms, this external support often becomes a harness around the model. The harness does not think for the model. Instead, it organizes context, constrains calls, manages state, tightens permissions, and inserts checks, rollback, and audit mechanisms at critical points.
+Permissions can also be reduced dynamically according to context. When the agent processes an unfamiliar webpage, an external email, or a third-party document, the system can automatically remove high-risk capabilities such as sending email, editing calendars, and making payments. Permissions return only after the context is cleared, the task is reconfirmed, or a human anchor performs a rigorous check.
 
-Deterministic anchors are external supports that do not depend on the model's free-form, in-the-moment inference. The model tries to understand the world. The anchors tell the model what still cannot be done if that understanding is wrong, which actions must stop, and which decisions require additional confirmation.
+In this design, even if an injection succeeds and the model issues a dangerous instruction, the system refuses to execute it. Prompt injection shows that untrusted environments will keep influencing the model's probabilistic judgments. Safety cannot depend mainly on the model distinguishing instructions from data on its own. Deterministic structures outside the model must constrain its actions.
 
-These anchors can be divided into two broad types. One type is the **human anchor**, which handles high-value, low-frequency judgments. The other is the **rule anchor**, which handles high-frequency guardrails and fallback constraints. Both are valuable, and both are easy to misuse.
+## 4. Questions That Remain
 
-### 1. The Human Anchor
+Adding an injection detector, a tool-call blacklist, a memory filter, or another confirmation prompt can all help. But patching vulnerabilities one at a time can leave the system fragmented, without explaining why similar problems keep recurring.
 
-Among external anchors, the human is the most intuitive. When the model is about to make a high-risk decision, the safest response seems to be to let a person review it. In many real settings, that intuition is correct. For irreversible, costly, or highly sensitive actions, human involvement can be indispensable.
+The whole path from input to execution needs to be considered together: how the model interprets input, how the system distinguishes sources, which information can inform decisions, how decisions become actions, who limits those actions, and how to contain consequences, retain audit trails, and correct errors. I prefer to think of this as governance because it concerns how the agent operates throughout a task.
 
-But involving a human is not the same as effective oversight. Many systems introduce human-in-the-loop controls and assume that if a user clicks a confirmation button, safety has improved. This is too optimistic. Human attention, patience, and judgment quality are limited.
+Three questions deserve further work.
 
-If the system asks for confirmation too frequently, decision fatigue appears. Users move from careful review to mechanical approval. Human-in-the-loop then degrades from effective oversight into a formal ritual.
+First, how can human confirmation produce reusable preferences and rules? Avoiding mechanical approval is only part of the problem. A meaningful human judgment should also help with later tasks, without requiring the same question every time.
 
-A common workplace example is an agent that asks for confirmation every time it sends an email, shares a document, changes a meeting, or downloads an attachment. At first, these prompts look like additional safety. But users quickly develop a reflex: approve without reading. The system keeps the appearance of human oversight, while the real oversight has turned into decoration.
+Second, how can we build a trust and permission model across information sources? System messages, user instructions, webpages, documents, emails, and tool outputs all take the form of text, but differ in trust and authority. Modeling trust and permissions at the input stage reaches beyond prompt injection defense alone.
 
-> Humans can handle complex value judgments better than models, but humans are not infinite, stable, high-quality supervision machines.
+Third, how can safety mechanisms cover long tasks? Multi-step plans, state updates, and tool calls allow risks to accumulate and amplify. Static defenses struggle to cover the whole process. Constraints need to remain effective as the task progresses.
 
-The key is when the human appears, how to reserve human attention for the moments where it matters most.
-
-### 2. The Rule Anchor
-
-If human anchors are best suited for a small number of high-value decisions, rule anchors are better suited for frequent, stable, automatable restrictions. People get tired, distracted, and worn down by interaction costs. Rules, if designed well, can execute consistently and repeatedly.
-
-Here, "rules" does not mean only simple if-else logic. It refers to any mechanism that can be reliably enforced by the system to constrain the action space: permission limits, data access controls, tool-call conditions, state-transition constraints, identity and role binding, lifecycle limits, task-level least privilege, source trust layering, risk classification, and audit mechanisms.
-
-The core value of rules is not that they improve the model's average judgment. Their value is that when the model is wrong, the system does not immediately escape its safe operating range. Rules do not answer whether the model is smart enough. They answer whether the consequences remain controlled when the model makes a mistake.
-
-Consider a travel-booking agent. It can search flights, book hotels, order rides, and submit reimbursement requests. A mature system should not merely expect the model to know when to be careful. It should explicitly enforce constraints: no booking without budget confirmation, no access to travel documents without identity verification, no cross-platform itinerary sharing without user confirmation, and automatic revocation of temporary access when the task ends. These are not acts of model benevolence. They are system-level constraints written in advance.
-
-Two mechanisms become especially important in an engineering implementation.
-
-The first is **taint tracking**. Text from webpages, emails, or third-party tools can be labeled as low-trust input inside the system. If the model attempts to pass that information into a high-privilege execution module, such as sending email, exporting files, or calling a payment tool, the rule layer can block it directly.
-
-The second is **ephemeral credentials**. More mature agent safety architectures will likely avoid giving models broad, long-lived permissions. Instead, they will issue temporary tokens according to the task: access only a specific calendar, read but not write, expire immediately after task completion.
-
-Both mechanisms reinforce the same point: rules ensure that when model decisions are wrong, the system still does not easily leave a reasonable safety boundary.
-
----
-
-## 3. Prompt Injection Revisited: From Cleaning the Mind to Constraining the Hands
-
-Prompt injection is dangerous not only because a model can be tricked by a malicious prompt. It is dangerous because it reveals a deeper fact about agent systems: the system must read external information to complete tasks, and that external information is itself untrusted. OWASP continues to list prompt injection as one of the core risks for GenAI applications.
-
-The most important point is that we should not remain overly optimistic about prompt injection. It is tempting to believe that if the system prompt is strong enough, or if sources are labeled clearly enough, the model will reliably separate instructions from data. Reality is not so simple. Once external text enters the context window of a modern language model, it is processed in the same semantic reasoning stream. In other words, the confusion between data and control is not an occasional bug. It is a structural difficulty in the model architecture.
-
-Once we accept this, the defensive strategy must change. The question is no longer how to ensure that the model is never influenced. The question is how the system avoids real damage after the model has been influenced. This is why a better principle for prompt injection is "assume compromise" or "zero trust". Recent security guidance from Microsoft makes a similar point: indirect injection, out-of-bound tool use, and high-impact mistaken operations should be treated as execution risks that require system-level controls.
-
-This brings us back to rule anchors. For injection, instead of placing all hope in text filtering, the system should directly control the blast radius: do not allow external email reading contexts to call outbound messaging tools; issue read-only temporary tokens; revoke permissions after the task ends. A more advanced implementation could dynamically downgrade permissions based on context. When an agent is processing an unfamiliar webpage, external email, or third-party document, the system can remove high-risk capabilities such as sending email, editing calendars, or making payments. Those permissions return only after the context is cleared, the task is reconfirmed, or a strong human check is completed.
-
-In this design, even if prompt injection succeeds and the model produces a dangerous instruction, the system layer refuses to execute it. What is protected is the system's capacity to act.
-
-Prompt injection therefore proves something deeper than "models are not smart enough." It shows that if a model's probabilistic judgment is inevitably influenced by untrusted environments, safety cannot mainly rely on the model's internal ability to distinguish trusted from untrusted input. It must rely on deterministic structures outside the model.
-
----
-
-## 4. From Vulnerability Patching to System Governance
-
-The previous sections have discussed several points: why agent safety can no longer be understood only as content safety; why improving the model alone is not a safety guarantee; why deterministic anchors must be added outside the model; why human anchors matter but cannot be relied on infinitely; why rule anchors are better suited for high-frequency constraints; and why prompt injection is a concentrated example of external anchors failing in open environments.
-
-If these points were merely placed side by side, they would still look like related but scattered topics. What matters is that they can be pulled into a single higher-level framework.
-
-Prompt injection, over-retrieval from memory, tool misuse, behavioral drift, and the failure modes of human-in-the-loop systems appear in different modules. But they all point to the same structural tension: **a system based on probabilistic inference is taking on decision responsibilities that require deterministic support.**
-
-Unifying these problems is not only conceptually cleaner. It changes how we design and study safety mechanisms.
-
-If we treat agent safety as a set of scattered vulnerabilities, the natural response is to patch each phenomenon separately: add a detector for injection attacks, add a blacklist for tool calls, add a filter for memory access, add another confirmation prompt for human approval. These patches can be valuable, but they easily make the system fragmented. They also do not answer the deeper question: why do these problems keep reappearing?
-
-Once we place them in the same framework, the real object of concern is the whole risk chain: how the model understands input, how the system distinguishes information sources, which information may enter decision-making, how decisions become execution, who tightens the action range, how consequences are limited after errors, and how audit trails support correction.
-
-This is why I prefer to understand agent safety as governance rather than defense. It is not facing one single vulnerability. It is shaping an entire operating order.
-
-If we compress the future agenda into a few fundamental engineering challenges, at least three stand out.
-
-First, move from human confirmation to preference sedimentation. The key is not only when to trigger human-in-the-loop, but how to prevent it from degrading into mechanical clicking, and how to turn one meaningful human judgment into reusable future rules and preferences.
-
-Second, build a trust and permission model across information sources. System messages, user instructions, webpages, documents, emails, and tool outputs may all look like text, but they do not have the same trust level or control authority. Taken seriously, this is not merely prompt injection defense. It is trust and permission modeling on the input side.
-
-Third, make safety mechanisms cover long-chain tasks. Many agent risks do not happen in a single step. They accumulate and amplify across multi-step plans, state updates, and tool calls. Mature agent safety should therefore not be only static defense. It needs process governance.
-
-> The goal of safety is not to turn the model into an error-free rational actor. The goal is to acknowledge uncertainty and design a world in which that uncertainty does not easily spiral out of control.
-
-Looking back at the entire article, the central question remains unchanged: why has the security of large language models and agents become far more complex than traditional content safety?
-
-The fundamental reason is that the role of the model has changed. It is no longer merely a tool for generating text; it is increasingly becoming a decision-making entity that continuously understands, judges, and acts in open environments. For this reason, agent security can no longer be reduced to patching individual attacks, nor can it rely on the hope of training a model that never makes mistakes.
-
-A more realistic goal is to acknowledge the probabilistic and uncertain nature of these models while ensuring that the overall system remains reliable. What truly needs to be built an operational framework suited to probabilistic intelligence: information sources should be tiered, permissions should be minimized, high-risk actions should be governed by human oversight or explicit rules, and errors should be contained within controllable boundaries rather than automatically amplified into irreversible consequences.
-
+These questions share a goal: accept that models make mistakes while keeping the overall system reliable. Source trust levels, least privilege, human or rule-based intervention for high-risk actions, and limits on the consequences of errors all need to be part of how the agent runs.
